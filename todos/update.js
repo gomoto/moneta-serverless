@@ -1,8 +1,6 @@
 'use strict';
 
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
-
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamodb = require('./dynamodb');
 
 module.exports.update = (event, context, callback) => {
   const timestamp = new Date().getTime();
@@ -33,7 +31,7 @@ module.exports.update = (event, context, callback) => {
   };
 
   // update the todo in the database
-  dynamoDb.update(params, (error, result) => {
+  dynamodb.update(params, (error, result) => {
     // handle potential errors
     if (error) {
       console.error(error);

@@ -1,8 +1,6 @@
 'use strict';
 
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
-
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamodb = require('./dynamodb');
 
 module.exports.get = (event, context, callback) => {
   const params = {
@@ -13,7 +11,7 @@ module.exports.get = (event, context, callback) => {
   };
 
   // fetch todo from the database
-  dynamoDb.get(params, (error, result) => {
+  dynamodb.get(params, (error, result) => {
     // handle potential errors
     if (error) {
       console.error(error);

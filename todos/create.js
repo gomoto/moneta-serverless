@@ -1,9 +1,7 @@
 'use strict';
 
 const uuid = require('uuid');
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
-
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamodb = require('./dynamodb');
 
 module.exports.create = (event, context, callback) => {
   const timestamp = new Date().getTime();
@@ -26,7 +24,7 @@ module.exports.create = (event, context, callback) => {
   };
 
   // write the todo to the database
-  dynamoDb.put(params, (error) => {
+  dynamodb.put(params, (error) => {
     // handle potential errors
     if (error) {
       console.error(error);

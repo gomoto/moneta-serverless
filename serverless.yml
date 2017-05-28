@@ -88,6 +88,21 @@ resources:
           WriteCapacityUnits: 1
         TableName: ${self:provider.environment.DYNAMODB_TABLE}
 
+plugins:
+  # `serverless-dynamodb-local` requires java jre
+  # and must be listed before serverless-offline plugin.
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migration: true
+    migration:
+      dir: offline/migrations
+
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
