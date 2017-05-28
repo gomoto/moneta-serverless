@@ -1,0 +1,8 @@
+{
+  "name": "moneta-serverless",
+  "version": "0.0.0",
+  "description": "",
+  "dependencies": {
+    "uuid": "^3.0.1"
+  }
+}
