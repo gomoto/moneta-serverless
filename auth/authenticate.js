@@ -1,6 +1,20 @@
-const jwt = require('jsonwebtoken');
+const jsonwebtoken = require('jsonwebtoken');
+const jwksRsa = require('jwks-rsa');
+
+const auth0 = {
+  clientId: process.env.AUTH0_CLIENT_ID || '',
+  domain: process.env.AUTH0_DOMAIN || ''
+};
+
+const jwksClient = jwksRsa({
+  cache: true,
+  rateLimit: true,
+  jwksRequestsPerMinute: 5,
+  jwksUri: `https://${auth0.domain}/.well-known/jwks.json`
+});
 
 // Policy helper function
+// http://docs.aws.amazon.com/apigateway/latest/developerguide/use-custom-authorizer.html#api-gateway-custom-authorizer-output
 const generatePolicy = (principalId, effect, resource) => {
   const authResponse = {};
   authResponse.principalId = principalId;
@@ -19,28 +33,38 @@ const generatePolicy = (principalId, effect, resource) => {
 };
 
 // Reusable Authorizer function, set on `authorizer` field in serverless.yml
-/*
-event: {
-  "type": "TOKEN",
-  "authorizationToken": "<Incoming bearer token>",
-  "methodArn": "arn:aws:execute-api:<Region id>:<Account id>:<API id>/<Stage>/<Method>/<Resource path>"
-}
-*/
+// http://docs.aws.amazon.com/apigateway/latest/developerguide/use-custom-authorizer.html
 module.exports.authenticate = (event, context, cb) => {
-  if (event.authorizationToken) {
-    // remove "bearer " from token
-    const token = event.authorizationToken.substring(7);
+  if (!event.authorizationToken) {
+    return cb('Unauthorized');
+  }
+
+  // Remove "Bearer " from token.
+  const token = event.authorizationToken.substring(7);
+
+  // Get kid, key id, from token header. This does not verify token.
+  const decodedToken = jsonwebtoken.decode(token, {complete: true}) || {};
+  const header = decodedToken.header || {};
+  const kid = header.kid || '';
+
+  // Get signing key from jwks uri.
+  jwksClient.getSigningKey(kid, (err, key) => {
+    if (err) {
+      return cb(err);
+    }
+    const signingKey = key.publicKey || key.rsaPublicKey;
     const options = {
-      audience: process.env.AUTH0_CLIENT_ID,
+      algorithms: ['RS256'],
+      audience: auth0.clientId,
+      issuer: `https://${auth0.domain}/`
     };
-    jwt.verify(token, process.env.AUTH0_CLIENT_SECRET, options, (err, decoded) => {
+    // Verify token using public signing key.
+    jsonwebtoken.verify(token, signingKey, options, (err, decoded) => {
       if (err) {
         cb('Unauthorized');
       } else {
         cb(null, generatePolicy(decoded.sub, 'Allow', event.methodArn));
       }
     });
-  } else {
-    cb('Unauthorized');
-  }
+  });
 };
