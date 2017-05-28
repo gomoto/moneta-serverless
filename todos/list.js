@@ -6,6 +6,7 @@ const params = {
 };
 
 module.exports.list = (event, context, callback) => {
+  const userId = event.requestContext.authorizer.principalId;
   // fetch all todos from the database
   dynamodb.scan(params, (error, result) => {
     // handle potential errors
