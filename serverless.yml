@@ -37,6 +37,13 @@ provider:
 functions:
   auth:
     handler: auth/authenticate.authenticate
+  settings:
+    handler: settings/get.get
+    events:
+      - http:
+          path: settings
+          method: get
+          cors: true
   create:
     handler: todos/create.create
     events:
