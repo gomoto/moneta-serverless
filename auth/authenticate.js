@@ -1,10 +1,8 @@
 const jsonwebtoken = require('jsonwebtoken');
 const jwksRsa = require('jwks-rsa');
 
-const auth0 = {
-  clientId: process.env.AUTH0_CLIENT_ID || '',
-  domain: process.env.AUTH0_DOMAIN || ''
-};
+const settings = require('../settings');
+const auth0 = settings.auth0;
 
 const jwksClient = jwksRsa({
   cache: true,
