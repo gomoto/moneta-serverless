@@ -37,6 +37,13 @@ provider:
 functions:
   auth:
     handler: auth/authenticate.authenticate
+  silent-callback:
+    handler: auth/silent-callback.get
+    events:
+      - http:
+          path: silent-callback
+          method: get
+          cors: true
   settings:
     handler: settings/get.get
     events:

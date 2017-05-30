@@ -1,3 +1,5 @@
+'use strict';
+
 const jsonwebtoken = require('jsonwebtoken');
 const jwksRsa = require('jwks-rsa');
 
